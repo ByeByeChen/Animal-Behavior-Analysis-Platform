@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Role Management</title>
+    <link rel="stylesheet" href="../static/layui/css/layui.css">
+</head>
+<body>
+    <button class="layui-btn" id="addRoleBtn">Add Role</button>
+    <table class="layui-hide" id="roleTable" lay-filter="roleTable"></table>
+
+    <script src="../static/layui/layui.js"></script>
+    <script type="text/html" id="roleActions">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">Edit</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">Delete</a>
+    </script>
+    <script>
+        layui.use(['table', 'layer', 'form'], function(){
+            var table = layui.table;
+            var layer = layui.layer;
+            var form = layui.form;
+
+            table.render({
+                elem: '#roleTable',
+                url: '/roles',
+                cols: [[
+                    {field: 'id', title: 'ID'},
+                    {field: 'name', title: 'Name'},
+                    {field: 'permissions', title: 'Permissions', templet: function(d) {
+                        return d.permissions.join(', ');
+                    }},
+                    {fixed: 'right', title: 'Actions', toolbar: '#roleActions'}
+                ]]
+            });
+
+            table.on('tool(roleTable)', function(obj){
+                var data = obj.data;
+                if(obj.event === 'del'){
+                    layer.confirm('Are you sure you want to delete this role?', function(index){
+                        $.ajax({
+                            url: '/roles/' + data.id,
+                            type: 'DELETE',
+                            success: function(result) {
+                                layer.msg('Role deleted successfully');
+                                table.reload('roleTable');
+                            }
+                        });
+                        layer.close(index);
+                    });
+                } else if(obj.event === 'edit'){
+                    layer.open({
+                        type: 1,
+                        title: 'Edit Role',
+                        content: $('#roleForm').html(),
+                        success: function(layero, index){
+                            form.val('roleForm', data);
+                            form.on('submit(roleFormSubmit)', function(formData){
+                                $.ajax({
+                                    url: '/roles/' + data.id,
+                                    type: 'PUT',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify(formData.field),
+                                    success: function(result) {
+                                        layer.msg('Role updated successfully');
+                                        layer.close(index);
+                                        table.reload('roleTable');
+                                    }
+                                });
+                                return false;
+                            });
+                        }
+                    });
+                }
+            });
+
+            $('#addRoleBtn').on('click', function(){
+                layer.open({
+                    type: 1,
+                    title: 'Add Role',
+                    content: $('#roleForm').html(),
+                    success: function(layero, index){
+                        form.on('submit(roleFormSubmit)', function(formData){
+                            $.ajax({
+                                url: '/roles',
+                                type: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify(formData.field),
+                                success: function(result) {
+                                    layer.msg('Role created successfully');
+                                    layer.close(index);
+                                    table.reload('roleTable');
+                                }
+                            });
+                            return false;
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script type="text/html" id="roleForm">
+        <form class="layui-form" lay-filter="roleForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label">Name</label>
+                <div class="layui-input-block">
+                    <input type="text" name="name" required lay-verify="required" placeholder="Enter Role Name" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">Permissions</label>
+                <div class="layui-input-block">
+                    <select name="permission_ids" lay-verify="required" multiple>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit lay-filter="roleFormSubmit">Submit</button>
+                </div>
+            </div>
+        </form>
+    </script>
+</body>
+</html>

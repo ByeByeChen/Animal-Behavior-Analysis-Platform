@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>自然语言查询</title>
+  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/layui/2.5.7/css/layui.css">
+</head>
+<body>
+  <div class="layui-container">
+    <div class="layui-row">
+      <div class="layui-col-md6 layui-col-md-offset3">
+        <div class="layui-card">
+          <div class="layui-card-header">Chat2DB</div>
+          <div class="layui-card-body" id="chatBox" style="height: 300px; overflow-y: scroll;">
+            <div class="response">Chat2DB！</div>
+          </div>
+          <div class="layui-card-footer">
+            <input type="text" id="inputText" class="layui-input" placeholder="Query">
+            <button id="submitBtn" class="layui-btn layui-btn-primary">Enter</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.bootcdn.net/ajax/libs/layui/2.5.7/layui.js"></script>
+  <script>
+    layui.use('jquery', function(){
+      var $ = layui.jquery;
+      
+      $('#submitBtn').click(function(){
+        var query_text = $('#inputText').val();
+        
+        $.ajax({
+          url: 'http://xxx/chat2db',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({query_text: query_text}),
+          success: function(response){
+            $('#chatBox').append('<div class="user">' + query_text + '</div>');
+            $('#chatBox').append('<div class="response">' + response.result + '</div>');
+            $('#inputText').val('');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

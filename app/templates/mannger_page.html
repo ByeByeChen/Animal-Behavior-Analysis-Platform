@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Service Management</title>
+    <link rel="stylesheet" href="../static/layui/css/layui.css">
+</head>
+<body>
+    <div class="layui-container">
+        <div class="layui-tab">
+            <ul class="layui-tab-title">
+                <li class="layui-this">PoseEstimationService</li>
+                <li>ActionRecognitionService</li>
+                <li>NLPQueryService</li>
+                <li>Experiment</li>
+                <li>PoseEstimationData</li>
+                <li>ActionRecognitionData</li>
+            </ul>
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show">
+                    <div class="layui-tab-item layui-show">
+                        <div class="layui-btn-container">
+                            <button class="layui-btn layui-btn-sm" lay-event="search">Search</button>
+                            <input type="text" id="searchServiceName" placeholder="Service Name" class="layui-input layui-input-sm">
+                        </div>
+                        <table id="poseEstimationServiceTable" lay-filter="poseEstimationServiceTable"></table>
+                    </div>
+                </div>
+                <div class="layui-tab-item">
+                    <div class="layui-btn-container">
+                        <button class="layui-btn layui-btn-sm" lay-event="search">Search</button>
+                        <input type="text" id="searchServiceName" placeholder="Service Name" class="layui-input layui-input-sm">
+                    </div>
+                    <table id="actionRecognitionServiceTable" lay-filter="actionRecognitionServiceTable"></table>
+                </div>
+                <div class="layui-tab-item">
+                    <div class="layui-btn-container">
+                        <button class="layui-btn layui-btn-sm" lay-event="search">Search</button>
+                        <input type="text" id="searchServiceName" placeholder="Service Name" class="layui-input layui-input-sm">
+                    </div>
+                    <table id="nlpQueryServiceTable" lay-filter="nlpQueryServiceTable"></table>
+                </div>
+                <div class="layui-tab-item">
+                    <table id="experimentTable" lay-filter="experimentTable"></table>
+                </div>
+                <div class="layui-tab-item">
+                    <table id="poseEstimationDataTable" lay-filter="poseEstimationDataTable"></table>
+                </div>
+                <div class="layui-tab-item">
+                    <table id="actionRecognitionDataTable" lay-filter="actionRecognitionDataTable"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../static/layui/layui.js"></script>
+    <script>
+        layui.use(['table', 'form'], function(){
+            var table = layui.table;
+            var form = layui.form;
+
+            // PoseEstimationService table
+            table.render({
+                elem: '#poseEstimationServiceTable',
+                url: '/pose_estimation_services',
+                cols: [[
+                    {field: 'id', title: 'ID', sort: true},
+                    {field: 'service_name', title: 'Service Name'},
+                    {field: 'api_endpoint', title: 'API Endpoint'},
+                    {field: 'config_path', title: 'Config Path'},
+                    {field: 'weights_path', title: 'Weights Path'},
+                    {fixed: 'right', title: 'Actions', toolbar: '#actionButtons'}
+                ]]
+            });
+
+            // ActionRecognitionService table
+            table.render({
+                elem: '#actionRecognitionServiceTable',
+                url: '/action_recognition_services',
+                cols: [[
+                    {field: 'id', title: 'ID', sort: true},
+                    {field: 'service_name', title: 'Service Name'},
+                    {field: 'api_endpoint', title: 'API Endpoint'},
+                    {field: 'config_path', title: 'Config Path'},
+                    {field: 'weights_path', title: 'Weights Path'},
+                    {fixed: 'right', title: 'Actions', toolbar: '#actionButtons'}
+                ]]
+            });
+
+            // NLPQueryService table
+            table.render({
+                elem: '#nlpQueryServiceTable',
+                url: '/nlp_query_services',
+                cols: [[
+                    {field: 'id', title: 'ID', sort: true},
+                    {field: 'service_name', title: 'Service Name'},
+                    {field: 'api_endpoint', title: 'API Endpoint'},
+                    {field: 'config_path', title: 'Config Path'},
+                    {field: 'weights_path', title: 'Weights Path'},
+                    {fixed: 'right', title: 'Actions', toolbar: '#actionButtons'}
+                ]]
+            });
+
+            // Experiment table
+            table.render({
+                elem: '#experimentTable',
+                url: '/experiments',
+                cols: [[
+                    {field: 'id', title: 'ID', sort: true},
+                    {field: 'experiment_name', title: 'Experiment Name'},
+                    {field: 'description', title: 'Description'},
+                    {field: 'video_filename', title: 'Video Filename'},
+                    {field: 'pose_estimation_service_id', title: 'Pose Estimation Service ID'},
+                    {field: 'action_recognition_service_id', title: 'Action Recognition Service ID'},
+                    {field: 'nlp_query_service_id', title: 'NLP Query Service ID'},
+                    {field: 'user_id', title: 'NLP Query Service ID'},
+                    {fixed: 'right', title: 'Actions', toolbar: '#actionButtons'}
+                ]]
+            });
+
+            // PoseEstimationData table
+            table.render({
+                elem: '#poseEstimationDataTable',
+                url: '/pose_estimation_data',
+                cols: [[
+                    {field: 'id', title: 'ID', sort: true},
+                    {field: 'experiment_id', title: 'Experiment ID'},
+                    {field: 'keypoints_data', title: 'Keypoints Data'},
+                    {fixed: 'right', title: 'Actions', toolbar: '#actionButtons'}
+                ]]
+            });
+
+            // ActionRecognitionData table
+            table.render({
+                elem: '#actionRecognitionDataTable',
+                url: '/action_recognition_data',
+                cols: [[
+                    {field: 'id', title: 'ID', sort: true},
+                    {field: 'experiment_id', title: 'Experiment ID'},
+                    {field: 'result_data', title: 'Result Data'},
+                    {fixed: 'right', title: 'Actions', toolbar: '#actionButtons'}
+                ]]
+            });
+
+            // Action buttons
+            table.on('tool(poseEstimationServiceTable)', function(obj){
+                var data = obj.data;
+                if(obj.event === 'edit'){
+                    editService(data, '/pose_estimation_services/' + data.id);
+                } else if(obj.event === 'delete'){
+                    deleteService(data.id, '/pose_estimation_services/' + data.id);
+                }
+            });
+
+            table.on('tool(actionRecognitionServiceTable)', function(obj){
+                var data = obj.data;
+                if(obj.event === 'edit'){
+                    editService(data, '/action_recognition_services/' + data.id);
+                } else if(obj.event === 'delete'){
+                    deleteService(data.id, '/action_recognition_services/' + data.id);
+                }
+            });
+
+            table.on('tool(nlpQueryServiceTable)', function(obj){
+                var data = obj.data;
+                if(obj.event === 'edit'){
+                    editService(data, '/nlp_query_services/' + data.id);
+                } else if(obj.event === 'delete'){
+                    deleteService(data.id, '/nlp_query_services/' + data.id);
+                }
+            });
+
+            table.on('tool(experimentTable)', function(obj){
+                var data = obj.data;
+                if(obj.event === 'edit'){
+                    editService(data, '/experiments/' + data.id);
+                } else if(obj.event === 'delete'){
+                    deleteService(data.id, '/experiments/' + data.id);
+                }
+            });
+
+            table.on('tool(poseEstimationDataTable)', function(obj){
+                var data = obj.data;
+                if(obj.event === 'edit'){
+                    editService(data, '/pose_estimation_data/' + data.id);
+                } else if(obj.event === 'delete'){
+                    deleteService(data.id, '/pose_estimation_data/' + data.id);
+                }
+            });
+
+            table.on('tool(actionRecognitionDataTable)', function(obj){
+                var data = obj.data;
+                if(obj.event === 'edit'){
+                    editService(data, '/action_recognition_data/' + data.id);
+                } else if(obj.event === 'delete'){
+                    deleteService(data.id, '/action_recognition_data/' + data.id);
+                }
+            });
+
+            function editService(data, url) {
+                form.val('editForm', data);
+                layer.open({
+                    type: 1,
+                    title: 'Edit Service',
+                    content: $('#editFormContainer'),
+                    btn: ['Save', 'Cancel'],
+                    yes: function(index, layero) {
+                        var formData = form.val('editForm');
+                        $.ajax({
+                            url: url,
+                            type: 'PUT',
+                            contentType: 'application/json',
+                            data: JSON.stringify(formData),
+                            success: function(res) {
+                                layer.msg('Service updated successfully');
+                                layer.close(index);
+                                table.reload();
+                            },
+                            error: function(err) {
+                                layer.msg('Failed to update service');
+                            }
+                        });
+                    }
+                });
+            }
+
+            function deleteService(id, url) {
+                layer.confirm('Are you sure you want to delete this service?', function(index) {
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        success: function(res) {
+                            layer.msg('Service deleted successfully');
+                            table.reload();
+                        },
+                        error: function(err) {
+                            layer.msg('Failed to delete service');
+                        }
+                    });
+                    layer.close(index);
+                });
+            }
+        });
+    </script>
+
+    <script type="text/html" id="actionButtons">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">Edit</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">Delete</a>
+    </script>
+
+    <div id="editFormContainer" style="display:none;">
+        <form class="layui-form" lay-filter="editForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label">Service Name</label>
+                <div class="layui-input-block">
+                    <input type="text" name="service_name" required  lay-verify="required" placeholder="Enter Service Name" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">API Endpoint</label>
+                <div class="layui-input-block">
+                    <input type="text" name="api_endpoint" required  lay-verify="required" placeholder="Enter API Endpoint" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">Config Path</label>
+                <div class="layui-input-block">
+                    <input type="text" name="config_path" required  lay-verify="required" placeholder="Enter Config Path" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">Weights Path</label>
+                <div class="layui-input-block">
+                    <input type="text" name="weights_path" required  lay-verify="required" placeholder="Enter Weights Path" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

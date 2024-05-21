@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Permission Management</title>
+    <link rel="stylesheet" href="../static/layui/css/layui.css">
+</head>
+<body>
+    <button class="layui-btn" id="addPermissionBtn">Add Permission</button>
+    <table class="layui-hide" id="permissionTable" lay-filter="permissionTable"></table>
+
+    <script src="../static/layui/layui.js"></script>
+    <script type="text/html" id="permissionActions">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">Edit</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">Delete</a>
+    </script>
+    <script>
+        layui.use(['table', 'layer', 'form'], function(){
+            var table = layui.table;
+            var layer = layui.layer;
+            var form = layui.form;
+
+            table.render({
+                elem: '#permissionTable',
+                url: '/permissions',
+                cols: [[
+                    {field: 'id', title: 'ID'},
+                    {field: 'name', title: 'Name'},
+                    {fixed: 'right', title: 'Actions', toolbar: '#permissionActions'}
+                ]]
+            });
+
+            table.on('tool(permissionTable)', function(obj){
+                var data = obj.data;
+                if(obj.event === 'del'){
+                    layer.confirm('Are you sure you want to delete this permission?', function(index){
+                        $.ajax({
+                            url: '/permissions/' + data.id,
+                            type: 'DELETE',
+                            success: function(result) {
+                                layer.msg('Permission deleted successfully');
+                                table.reload('permissionTable');
+                            }
+                        });
+                        layer.close(index);
+                    });
+                } else if(obj.event === 'edit'){
+                    layer.open({
+                        type: 1,
+                        title: 'Edit Permission',
+                        content: $('#permissionForm').html(),
+                        success: function(layero, index){
+                            form.val('permissionForm', data);
+                            form.on('submit(permissionFormSubmit)', function(formData){
+                                $.ajax({
+                                    url: '/permissions/' + data.id,
+                                    type: 'PUT',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify(formData.field),
+                                    success: function(result) {
+                                        layer.msg('Permission updated successfully');
+                                        layer.close(index);
+                                        table.reload('permissionTable');
+                                    }
+                                });
+                                return false;
+                            });
+                        }
+                    });
+                }
+            });
+
+            $('#addPermissionBtn').on('click', function(){
+                layer.open({
+                    type: 1,
+                    title: 'Add Permission',
+                    content: $('#permissionForm').html(),
+                    success: function(layero, index){
+                        form.on('submit(permissionFormSubmit)', function(formData){
+                            $.ajax({
+                                url: '/permissions',
+                                type: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify(formData.field),
+                                success: function(result) {
+                                    layer.msg('Permission created successfully');
+                                    layer.close(index);
+                                    table.reload('permissionTable');
+                                }
+                            });
+                            return false;
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script type="text/html" id="permissionForm">
+        <form class="layui-form" lay-filter="permissionForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label">Name</label>
+                <div class="layui-input-block">
+                    <input type="text" name="name" required lay-verify="required" placeholder="Enter Permission Name" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit lay-filter="permissionFormSubmit">Submit</button>
+                </div>
+            </div>
+        </form>
+    </script>
+</body>
+</html>

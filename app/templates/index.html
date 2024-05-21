@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">动物行为分析平台</div>
+    </div>
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                <li class="layui-nav-item"><a href="/user_management" data-url="/user_management">用户管理</a></li>
+                <li class="layui-nav-item"><a href="/role_management" data-url="/role_management">角色管理</a></li>
+                <li class="layui-nav-item"><a href="/permission_management" data-url="/permission_management">权限管理</a></li>
+                <li class="layui-nav-item"><a href="/offline_experiment_management" data-url="/offline_experiment_management">离线实验管理</a></li>
+                <li class="layui-nav-item"><a href="/video_stream_experiment_management" data-url="/video_stream_experiment_management">视频流试验管理</a></li>
+                <li class="layui-nav-item"><a href="/pose_estimation_service_management" data-url="/pose_estimation_service_management">姿态估计服务管理</a></li>
+                <li class="layui-nav-item"><a href="/behavior_recognition_service_management" data-url="/behavior_recognition_service_management">行为识别服务管理</a></li>
+                <li class="layui-nav-item"><a href="/pose_estimation_data_management" data-url="/pose_estimation_data_management">姿态估计数据管理</a></li>
+                <li class="layui-nav-item"><a href="/behavior_recognition_data_management" data-url="/behavior_recognition_data_management">行为识别数据管理</a></li>
+                <li class="layui-nav-item"><a href="/nlp_query_service_management" data-url="/nl_query_service_management">自然语言查询服务管理</a></li>
+                <li class="layui-nav-item"><a href="/chat2db" data-url="/chat2db">Chat2DB</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="layui-body">
+        <iframe id="content-frame" src="" frameborder="0" style="width: 100%; height: 100%;"></iframe>
+    </div>
+</div>
+
+<script>
+layui.use('element', function(){
+    var element = layui.element;
+    document.querySelectorAll('.layui-nav-item a').forEach(function(item) {
+        item.addEventListener('click', function() {
+            document.getElementById('content-frame').src = item.getAttribute('data-url');
+        });
+    });
+});
+</script>
+{% endblock %}

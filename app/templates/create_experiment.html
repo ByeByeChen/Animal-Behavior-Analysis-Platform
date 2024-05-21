@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Experiment</title>
+    <link rel="stylesheet" href="../static/layui/css/layui.css">
+</head>
+<body>
+    <h1>Create Experiment</h1>
+    <form class="layui-form" method="post" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="layui-form-item">
+            <label class="layui-form-label">{{ form.experiment_name.label }}</label>
+            <div class="layui-input-block">
+                {{ form.experiment_name() }}
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">{{ form.description.label }}</label>
+            <div class="layui-input-block">
+                {{ form.description() }}
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">{{ form.video_file.label }}</label>
+            <div class="layui-input-block">
+                {{ form.video_file() }}
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">{{ form.pose_estimation_service.label }}</label>
+            <div class="layui-input-block">
+                {{ form.pose_estimation_service() }}
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">{{ form.action_recognition_service.label }}</label>
+            <div class="layui-input-block">
+                {{ form.action_recognition_service() }}
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">{{ form.nlp_query_service.label }}</label>
+            <div class="layui-input-block">
+                {{ form.nlp_query_service() }}
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                {{ form.submit() }}
+            </div>
+        </div>
+    </form>
+    
+    <script src="../static/layui/layui.js"></script>
+</body>
+</html>

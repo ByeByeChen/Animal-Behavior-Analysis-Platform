@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Experiment Management</title>
+    <link rel="stylesheet" href="../static/layui/css/layui.css">
+</head>
+<body>
+    <div class="layui-container" style="margin-top: 20px;">
+        <button id="addExperimentBtn" class="layui-btn">Add Experiment</button>
+        <table id="experimentTable" lay-filter="experimentTable"></table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="../static/layui/layui.js"></script>
+    <script>
+        layui.use(['table', 'layer', 'form'], function() {
+            var table = layui.table;
+            var layer = layui.layer;
+            var form = layui.form;
+
+            // 初始化表格
+            table.render({
+                elem: '#experimentTable',
+                url: '/experiments',
+                cols: [[
+                    {field: 'experiment_name', title: 'Experiment Name'},
+                    {field: 'description', title: 'Description'},
+                    {field: 'video_stream_url', title: 'Video Stream URL'},
+                    {field: 'user_id', title: 'User ID'},
+                    {field: 'pose_estimation_service_id', title: 'Pose Estimation Service ID'},
+                    {field: 'action_recognition_service_id', title: 'Action Recognition Service ID'},
+                    {field: 'nlp_query_service_id', title: 'NLP Query Service ID'},
+                    {fixed: 'right', title: 'Actions', toolbar: '#actionBar'}
+                ]]
+            });
+
+            // 监听工具条
+            table.on('tool(experimentTable)', function(obj) {
+                var data = obj.data;
+                if (obj.event === 'del') {
+                    layer.confirm('Are you sure you want to delete this experiment?', function(index) {
+                        axios.delete('/experiments/' + data.id)
+                            .then(function(response) {
+                                layer.msg(response.data.message);
+                                table.reload('experimentTable');
+                            });
+                        layer.close(index);
+                    });
+                } else if (obj.event === 'edit') {
+                    openEditForm(data);
+                }
+            });
+
+            // 打开编辑表单
+            function openEditForm(data) {
+                layer.open({
+                    type: 1,
+                    title: 'Edit Experiment',
+                    content: getFormHtml(data),
+                    area: ['500px', '600px'],
+                    btn: ['Save', 'Cancel'],
+                    yes: function(index, layero){
+                        var formData = getFormData(layero);
+                        axios.put('/experiments/' + data.id, formData)
+                            .then(function(response) {
+                                layer.msg(response.data.message);
+                                table.reload('experimentTable');
+                                layer.close(index);
+                            });
+                    }
+                });
+            }
+
+            // 获取表单HTML
+            function getFormHtml(data) {
+                return `
+                    <form class="layui-form" style="margin: 20px;">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">Experiment Name</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="experiment_name" required lay-verify="required" placeholder="Enter experiment name" class="layui-input" value="${data ? data.experiment_name : ''}">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">Description</label>
+                            <div class="layui-input-block">
+                                <textarea name="description" required lay-verify="required" placeholder="Enter description" class="layui-textarea">${data ? data.description : ''}</textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">Video Stream URL</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="video_stream_url" required lay-verify="required" placeholder="Enter video stream URL" class="layui-input" value="${data ? data.video_stream_url : ''}">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">User ID</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="user_id" required lay-verify="required" placeholder="Enter user ID" class="layui-input" value="${data ? data.user_id : ''}">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">Pose Estimation Service ID</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="pose_estimation_service_id" required lay-verify="required" placeholder="Enter pose estimation service ID" class="layui-input" value="${data ? data.pose_estimation_service_id : ''}">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">Action Recognition Service ID</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="action_recognition_service_id" required lay-verify="required" placeholder="Enter action recognition service ID" class="layui-input" value="${data ? data.action_recognition_service_id : ''}">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">NLP Query Service ID</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="nlp_query_service_id" required lay-verify="required" placeholder="Enter NLP query service ID" class="layui-input" value="${data ? data.nlp_query_service_id : ''}">
+                            </div>
+                        </div>
+                    </form>
+                `;
+            }
+
+            // 获取表单数据
+            function getFormData(layero) {
+                var formData = {};
+                layero.find('form').serializeArray().forEach(function(item) {
+                    formData[item.name] = item.value;
+                });
+                return formData;
+            }
+
+            // 添加实验按钮点击事件
+            document.getElementById('addExperimentBtn').addEventListener('click', function() {
+                openAddForm();
+            });
+
+            // 打开添加表单
+            function openAddForm() {
+                layer.open({
+                    type: 1,
+                    title: 'Add Experiment',
+                    content: getAddFormHtml(),
+                    area: ['500px', '600px'],
+                    btn: ['Save', 'Cancel'],
+                    yes: function(index, layero){
+                        var formData = getFormData(layero);
+                        axios.post('/experiments', formData)
+                            .then(function(response) {
+                                layer.msg(response.data.message);
+                                table.reload('experimentTable');
+                                layer.close(index);
+                            });
+                    },
+                    success: function(layero, index) {
+                        // Load services to dropdowns
+                        loadServices(layero);
+                    }
+                });
+            }
+
+            // 获取添加表单HTML
+            function getAddFormHtml() {
+                return `
+                    <form class="layui-form" style="margin: 20px;">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">Experiment Name</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="experiment_name" required lay-verify="required" placeholder="Enter experiment name" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">Description</label>
+                            <div class="layui-input-block">
+                                <textarea name="description" required lay-verify="required" placeholder="Enter description" class="layui-textarea"></textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">Video Stream URL</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="video_stream_url" required lay-verify="required" placeholder="Enter video stream URL" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">User ID</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="user_id" required lay-verify="required" placeholder="Enter user ID" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">Pose Estimation Service</label>
+                            <div class="layui-input-block">
+                                <select name="pose_estimation_service_id" required lay-verify="required">
+                                    <option value="">Select Pose Estimation Service</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">Action Recognition Service</label>
+                            <div class="layui-input-block">
+                                <select name="action_recognition_service_id" required lay-verify="required">
+                                    <option value="">Select Action Recognition Service</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">NLP Query Service</label>
+                            <div class="layui-input-block">
+                                <select name="nlp_query_service_id" required lay-verify="required">
+                                    <option value="">Select NLP Query Service</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                `;
+            }
+
+            // 加载服务到下拉列表
+            function loadServices(layero) {
+                axios.get('/services/pose_estimation')
+                    .then(function(response) {
+                        var options = response.data.map(function(service) {
+                            return `<option value="${service.id}">${service.name}</option>`;
+                        }).join('');
+                        layero.find('select[name="pose_estimation_service_id"]').append(options);
+                        form.render('select');
+                    });
+
+                axios.get('/services/action_recognition')
+                    .then(function(response) {
+                        var options = response.data.map(function(service) {
+                            return `<option value="${service.id}">${service.name}</option>`;
+                        }).join('');
+                        layero.find('select[name="action_recognition_service_id"]').append(options);
+                        form.render('select');
+                    });
+
+                axios.get('/services/nlp_query')
+                    .then(function(response) {
+                        var options = response.data.map(function(service) {
+                            return `<option value="${service.id}">${service.name}</option>`;
+                        }).join('');
+                        layero.find('select[name="nlp_query_service_id"]').append(options);
+                        form.render('select');
+                    });
+            }
+        });
+    </script>
+
+    <script type="text/html" id="actionBar">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">Edit</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">Delete</a>
+    </script>
+</body>
+</html>

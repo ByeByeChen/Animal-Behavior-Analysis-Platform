@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Experiment Detail</title>
+    <link rel="stylesheet" href="../static/layui/css/layui.css">
+</head>
+<body>
+    <div class="layui-container">
+        <div class="layui-row">
+            <div class="layui-col-md-12">
+                <h1>{{ experiment.experiment_name }}</h1>
+                <p>{{ experiment.description }}</p>
+                
+                <div class="layui-collapse">
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">Pose Estimation Data</h2>
+                        <div class="layui-colla-content layui-show">
+                            <pre>{{ pose_data.keypoints_data }}</pre>
+                        </div>
+                    </div>
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">Action Recognition Data</h2>
+                        <div class="layui-colla-content layui-show">
+                            <pre>{{ action_data.result_data }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../static/layui/layui.js"></script>
+    <script>
+        layui.use('element', function(){
+            var element = layui.element;
+        });
+    </script>
+</body>
+</html>

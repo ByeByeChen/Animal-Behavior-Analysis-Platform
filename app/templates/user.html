@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>User Management</title>
+    <link rel="stylesheet" href="../static/layui/css/layui.css">
+</head>
+<body>
+    <button class="layui-btn" id="addUserBtn">Add User</button>
+    <table class="layui-hide" id="userTable" lay-filter="userTable"></table>
+
+    <script src="../static/layui/layui.js"></script>
+    <script type="text/html" id="userActions">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">Edit</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">Delete</a>
+    </script>
+    <script>
+        layui.use(['table', 'layer', 'form'], function(){
+            var table = layui.table;
+            var layer = layui.layer;
+            var form = layui.form;
+
+            table.render({
+                elem: '#userTable',
+                url: '/users',
+                cols: [[
+                    {field: 'id', title: 'ID'},
+                    {field: 'username', title: 'Username'},
+                    {field: 'email', title: 'Email'},
+                    {field: 'roles', title: 'Roles', templet: function(d) {
+                        return d.roles.join(', ');
+                    }},
+                    {fixed: 'right', title: 'Actions', toolbar: '#userActions'}
+                ]]
+            });
+
+            table.on('tool(userTable)', function(obj){
+                var data = obj.data;
+                if(obj.event === 'del'){
+                    layer.confirm('Are you sure you want to delete this user?', function(index){
+                        $.ajax({
+                            url: '/users/' + data.id,
+                            type: 'DELETE',
+                            success: function(result) {
+                                layer.msg('User deleted successfully');
+                                table.reload('userTable');
+                            }
+                        });
+                        layer.close(index);
+                    });
+                } else if(obj.event === 'edit'){
+                    layer.open({
+                        type: 1,
+                        title: 'Edit User',
+                        content: $('#userForm').html(),
+                        success: function(layero, index){
+                            form.val('userForm', data);
+                            form.on('submit(userFormSubmit)', function(formData){
+                                $.ajax({
+                                    url: '/users/' + data.id,
+                                    type: 'PUT',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify(formData.field),
+                                    success: function(result) {
+                                        layer.msg('User updated successfully');
+                                        layer.close(index);
+                                        table.reload('userTable');
+                                    }
+                                });
+                                return false;
+                            });
+                        }
+                    });
+                }
+            });
+
+            $('#addUserBtn').on('click', function(){
+                layer.open({
+                    type: 1,
+                    title: 'Add User',
+                    content: $('#userForm').html(),
+                    success: function(layero, index){
+                        form.on('submit(userFormSubmit)', function(formData){
+                            $.ajax({
+                                url: '/users',
+                                type: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify(formData.field),
+                                success: function(result) {
+                                    layer.msg('User created successfully');
+                                    layer.close(index);
+                                    table.reload('userTable');
+                                }
+                            });
+                            return false;
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script type="text/html" id="userForm">
+        <form class="layui-form" lay-filter="userForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label">Username</label>
+                <div class="layui-input-block">
+                    <input type="text" name="username" required lay-verify="required" placeholder="Enter Username" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">Email</label>
+                <div class="layui-input-block">
+                    <input type="text" name="email" required lay-verify="required" placeholder="Enter Email" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">Password</label>
+                <div class="layui-input-block">
+                    <input type="password" name="password" required lay-verify="required" placeholder="Enter Password" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">Roles</label>
+                <div class="layui-input-block">
+                    <select name="role_ids" lay-verify="required" multiple>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit lay-filter="userFormSubmit">Submit</button>
+                </div>
+            </div>
+        </form>
+    </script>
+</body>
+</html>
